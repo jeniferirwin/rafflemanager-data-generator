@@ -131,14 +131,27 @@ class RaffleDataGenerator:
             roster_data.append(entry)
         return roster_data
     
-    def generate_mail_data(self, num_entries: int) -> List[Dict[str, Any]]:
-        """Generate mail data entries"""
+    def generate_mail_data(self, num_entries: int, ticket_cost: int = 1000) -> List[Dict[str, Any]]:
+        """Generate mail data entries with amounts mostly divisible by ticket_cost"""
         mail_data = []
         for i in range(num_entries):
+            # 90% of users send correct amounts (divisible by ticket_cost)
+            # 10% send incorrect amounts
+            if random.random() < 0.9:
+                # Generate a valid amount (multiple of ticket_cost)
+                num_tickets = random.randint(1, 1000)  # 1 to 1000 tickets
+                amount = num_tickets * ticket_cost
+            else:
+                # Generate an invalid amount (not divisible by ticket_cost)
+                base_amount = random.randint(1, 1000) * ticket_cost
+                # Add a random offset that makes it invalid
+                offset = random.randint(1, ticket_cost - 1)
+                amount = base_amount + offset
+            
             entry = {
                 "subject": random.choice(MAIL_SUBJECTS),
                 "id": self.generate_mail_id(),
-                "amount": random.randint(5000, 1000000),
+                "amount": amount,
                 "user": self.generate_username()
             }
             mail_data.append(entry)
@@ -158,12 +171,12 @@ class RaffleDataGenerator:
     
     def generate_mail_account(self, ticket_cost: int = 1000) -> Dict[str, Any]:
         """Generate an account with only mail data"""
-        num_mail_entries = random.randint(3, 30)
+        num_mail_entries = random.randint(10, 30)
         
         account_data = {
             "version": 1,
             "ticket_cost": ticket_cost,
-            "mail_data": self.generate_mail_data(num_mail_entries),
+            "mail_data": self.generate_mail_data(num_mail_entries, ticket_cost),
             "timestamp": random.randint(1600000000, int(time.time()))
         }
         
@@ -177,12 +190,12 @@ class RaffleDataGenerator:
     def generate_mixed_account(self, ticket_cost: int = 1000) -> Dict[str, Any]:
         """Generate an account with both roster and mail data"""
         num_roster_entries = random.randint(5, 50)
-        num_mail_entries = random.randint(3, 30)
+        num_mail_entries = random.randint(10, 30)
         
         account_data = {
             "version": 1,
             "ticket_cost": ticket_cost,
-            "mail_data": self.generate_mail_data(num_mail_entries),
+            "mail_data": self.generate_mail_data(num_mail_entries, ticket_cost),
             "timestamp": random.randint(1600000000, int(time.time())),
             "roster_data": self.generate_roster_data(num_roster_entries)
         }

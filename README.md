@@ -37,7 +37,7 @@ rafflemanager-data-generator/
 ## Usage
 
 ```bash
-python generate_raffle_data.py <blank_count> <roster_count> <mail_count> <mixed_count> [--filename OUTPUT_FILE]
+python generate_raffle_data.py <blank_count> <roster_count> <mail_count> <mixed_count> [--filename OUTPUT_FILE] [--ticket-cost COST]
 ```
 
 ### Arguments
@@ -47,33 +47,35 @@ python generate_raffle_data.py <blank_count> <roster_count> <mail_count> <mixed_
 - `mail_count`: Number of mail-only accounts  
 - `mixed_count`: Number of mixed accounts (both roster and mail data)
 - `--filename`, `-f`: Optional output filename (default: `RaffleManager_Generated.lua`)
+- `--ticket-cost`, `-t`: Optional ticket cost for all accounts (default: 1000)
 
 ### Examples
 
-Generate a balanced test file:
+Generate a balanced test file with default 1000 gold ticket cost:
 ```bash
 python generate_raffle_data.py 5 10 15 20
 ```
 
-Generate a large file with only blank accounts:
+Generate a large file with only blank accounts and custom ticket cost:
 ```bash
-python generate_raffle_data.py 100 0 0 0 --filename large_blank.lua
+python generate_raffle_data.py 100 0 0 0 --filename large_blank.lua --ticket-cost 500
 ```
 
-Generate mail-heavy test data:
+Generate mail-heavy test data with expensive tickets:
 ```bash
-python generate_raffle_data.py 0 0 50 0 --filename mail_only.lua
+python generate_raffle_data.py 0 0 50 0 --filename mail_only.lua -t 2000
 ```
 
-Generate a comprehensive test file:
+Generate a comprehensive test file with custom ticket cost:
 ```bash
-python generate_raffle_data.py 25 50 75 100 --filename comprehensive_test.lua
+python generate_raffle_data.py 25 50 75 100 --filename comprehensive_test.lua --ticket-cost 1500
 ```
 
 **Windows Users**: Use the convenient batch file:
 ```cmd
 generate.bat 5 10 15 20
-generate.bat 100 0 0 0 large_blank.lua
+generate.bat 100 0 0 0 large_blank.lua 500
+generate.bat 10 20 30 40 custom.lua 1500
 ```
 
 **More Examples**: See `sample_commands.txt` for additional usage scenarios.
@@ -157,7 +159,7 @@ Generated RaffleManager_Generated.lua with 50 accounts:
 ## Data Ranges
 
 The generator uses realistic ranges for ESO data:
-- **Ticket Costs**: 500, 1000, 1500, 2000 gold
+- **Ticket Costs**: User-specified (default: 1000 gold) - can be any positive integer
 - **Mail Amounts**: 5,000 - 1,000,000 gold
 - **Sales Data**: 0 - 5,000,000 gold
 - **Purchase Data**: 0 - 100,000 gold
@@ -208,25 +210,28 @@ Validated 1171 roster entries
 
 ### Quick Start Commands
 ```bash
-# Generate a small test file
+# Generate a small test file with default ticket cost (1000)
 python generate_raffle_data.py 2 3 5 2 --filename quick_test.lua
+
+# Generate with custom ticket cost
+python generate_raffle_data.py 2 3 5 2 --filename custom_test.lua --ticket-cost 500
 
 # Validate the generated file
 python validate.py quick_test.lua
 
 # Use batch file (Windows)
-generate.bat 2 3 5 2 quick_test.lua
+generate.bat 2 3 5 2 quick_test.lua 500
 ```
 
 ## Quick Reference
 
 | Command | Purpose |
 |---------|---------|
-| `python generate_raffle_data.py 10 20 30 40` | Generate mixed test data |
-| `python generate_raffle_data.py 100 0 0 0 --filename blanks.lua` | 100 blank accounts only |
-| `python generate_raffle_data.py 0 0 200 0 --filename mail.lua` | 200 mail accounts only |
+| `python generate_raffle_data.py 10 20 30 40` | Generate mixed test data (default 1000 ticket cost) |
+| `python generate_raffle_data.py 100 0 0 0 --filename blanks.lua --ticket-cost 500` | 100 blank accounts with 500 gold tickets |
+| `python generate_raffle_data.py 0 0 200 0 --filename mail.lua -t 2000` | 200 mail accounts with expensive tickets |
 | `python validate.py filename.lua` | Validate file consistency |
-| `generate.bat 5 5 5 5` | Windows: Generate balanced test file |
+| `generate.bat 5 5 5 5 custom.lua 1500` | Windows: Generate with custom filename and ticket cost |
 
 ## Contributing
 

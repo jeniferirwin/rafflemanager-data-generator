@@ -1,26 +1,30 @@
 # Sample Generator Commands
 # Copy and paste these commands to generate common test scenarios
 
-# Small test file - good for quick testing
+# Small test file - good for quick testing (default 1000 ticket cost)
 python generate_raffle_data.py 5 5 5 5 --filename small_test.lua
 
 # Large blank file - for testing basic functionality with many accounts
 python generate_raffle_data.py 500 0 0 0 --filename large_blank.lua
 
-# Mail-heavy file - for testing mail processing
-python generate_raffle_data.py 10 0 100 0 --filename mail_heavy.lua
+# Mail-heavy file - for testing mail processing with custom ticket cost
+python generate_raffle_data.py 10 0 100 0 --filename mail_heavy.lua --ticket-cost 500
 
-# Roster-heavy file - for testing guild roster functionality  
-python generate_raffle_data.py 10 100 0 0 --filename roster_heavy.lua
+# Roster-heavy file - for testing guild roster functionality with expensive tickets
+python generate_raffle_data.py 10 100 0 0 --filename roster_heavy.lua -t 2000
 
-# Mixed data file - comprehensive testing
-python generate_raffle_data.py 25 50 75 50 --filename comprehensive.lua
+# Mixed data file - comprehensive testing with mid-range ticket cost
+python generate_raffle_data.py 25 50 75 50 --filename comprehensive.lua --ticket-cost 1500
 
-# Performance test file - very large dataset
+# Performance test file - very large dataset with default ticket cost
 python generate_raffle_data.py 100 200 300 400 --filename performance_test.lua
 
-# Edge case testing - single accounts of each type
-python generate_raffle_data.py 1 1 1 1 --filename edge_cases.lua
+# Edge case testing - single accounts of each type with cheap tickets
+python generate_raffle_data.py 1 1 1 1 --filename edge_cases.lua -t 250
 
-# Extreme size test - massive file for stress testing
-python generate_raffle_data.py 500 500 500 500 --filename extreme_test.lua
+# Extreme size test - massive file for stress testing with premium tickets
+python generate_raffle_data.py 500 500 500 500 --filename extreme_test.lua --ticket-cost 5000
+
+# Custom ticket costs examples
+python generate_raffle_data.py 20 30 40 10 --filename affordable.lua -t 100
+python generate_raffle_data.py 10 20 30 40 --filename expensive.lua -t 10000

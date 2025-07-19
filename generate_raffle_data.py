@@ -90,9 +90,8 @@ class RaffleDataGenerator:
                 self.used_mail_ids.add(mail_id)
                 return mail_id
     
-    def generate_blank_account(self) -> Dict[str, Any]:
+    def generate_blank_account(self, ticket_cost: int = 1000) -> Dict[str, Any]:
         """Generate a blank account with minimal data"""
-        ticket_cost = random.choice([500, 1000, 1500, 2000])
         return {
             "$AccountWide": {
                 "version": 1,
@@ -145,10 +144,9 @@ class RaffleDataGenerator:
             mail_data.append(entry)
         return mail_data
     
-    def generate_roster_account(self) -> Dict[str, Any]:
+    def generate_roster_account(self, ticket_cost: int = 1000) -> Dict[str, Any]:
         """Generate an account with only roster data"""
         num_roster_entries = random.randint(5, 50)
-        ticket_cost = random.choice([500, 1000, 1500, 2000])
         
         return {
             "$AccountWide": {
@@ -158,10 +156,9 @@ class RaffleDataGenerator:
             }
         }
     
-    def generate_mail_account(self) -> Dict[str, Any]:
+    def generate_mail_account(self, ticket_cost: int = 1000) -> Dict[str, Any]:
         """Generate an account with only mail data"""
         num_mail_entries = random.randint(3, 30)
-        ticket_cost = random.choice([500, 1000, 1500, 2000])
         
         account_data = {
             "version": 1,
@@ -177,11 +174,10 @@ class RaffleDataGenerator:
         
         return {"$AccountWide": account_data}
     
-    def generate_mixed_account(self) -> Dict[str, Any]:
+    def generate_mixed_account(self, ticket_cost: int = 1000) -> Dict[str, Any]:
         """Generate an account with both roster and mail data"""
         num_roster_entries = random.randint(5, 50)
         num_mail_entries = random.randint(3, 30)
-        ticket_cost = random.choice([500, 1000, 1500, 2000])
         
         account_data = {
             "version": 1,
@@ -244,29 +240,29 @@ class RaffleDataGenerator:
             return str(value)
     
     def generate_file(self, blank_count: int, roster_count: int, 
-                     mail_count: int, mixed_count: int, filename: str):
+                     mail_count: int, mixed_count: int, filename: str, ticket_cost: int = 1000):
         """Generate a complete .lua file with specified account types"""
         accounts = {}
         
         # Generate blank accounts
         for _ in range(blank_count):
             username = self.generate_username()
-            accounts[username] = self.generate_blank_account()
+            accounts[username] = self.generate_blank_account(ticket_cost)
         
         # Generate roster accounts
         for _ in range(roster_count):
             username = self.generate_username()
-            accounts[username] = self.generate_roster_account()
+            accounts[username] = self.generate_roster_account(ticket_cost)
         
         # Generate mail accounts
         for _ in range(mail_count):
             username = self.generate_username()
-            accounts[username] = self.generate_mail_account()
+            accounts[username] = self.generate_mail_account(ticket_cost)
         
         # Generate mixed accounts
         for _ in range(mixed_count):
             username = self.generate_username()
-            accounts[username] = self.generate_mixed_account()
+            accounts[username] = self.generate_mixed_account(ticket_cost)
         
         # Create the full data structure
         data = {
@@ -310,13 +306,13 @@ def main():
         epilog="""
 Examples:
   python generate_raffle_data.py 5 10 15 20
-    Generates a file with 5 blank, 10 roster, 15 mail, and 20 mixed accounts
+    Generates a file with 5 blank, 10 roster, 15 mail, and 20 mixed accounts (default 1000 ticket cost)
 
-  python generate_raffle_data.py 100 0 0 0 --filename large_blank.lua
-    Generates a file with 100 blank accounts only
+  python generate_raffle_data.py 100 0 0 0 --filename large_blank.lua --ticket-cost 500
+    Generates a file with 100 blank accounts only, with 500 gold ticket cost
 
-  python generate_raffle_data.py 0 0 50 0 --filename mail_only.lua
-    Generates a file with 50 mail accounts only
+  python generate_raffle_data.py 0 0 50 0 --filename mail_only.lua -t 2000
+    Generates a file with 50 mail accounts only, with 2000 gold ticket cost
         """
     )
     
@@ -328,6 +324,8 @@ Examples:
                        help='Number of mail-only accounts')
     parser.add_argument('mixed_count', type=int,
                        help='Number of mixed accounts (both roster and mail)')
+    parser.add_argument('--ticket-cost', '-t', type=int, default=1000,
+                       help='Ticket cost for all accounts (default: 1000)')
     parser.add_argument('--filename', '-f', type=str,
                        help='Output filename (default: RaffleManager_Generated.lua)')
     
@@ -336,6 +334,10 @@ Examples:
     # Validate arguments
     if args.blank_count < 0 or args.roster_count < 0 or args.mail_count < 0 or args.mixed_count < 0:
         print("Error: All account counts must be non-negative")
+        return 1
+    
+    if args.ticket_cost <= 0:
+        print("Error: Ticket cost must be positive")
         return 1
     
     total_accounts = args.blank_count + args.roster_count + args.mail_count + args.mixed_count
@@ -355,7 +357,7 @@ Examples:
     # Generate the file
     generator = RaffleDataGenerator()
     generator.generate_file(args.blank_count, args.roster_count, 
-                           args.mail_count, args.mixed_count, filename)
+                           args.mail_count, args.mixed_count, filename, args.ticket_cost)
     
     return 0
 

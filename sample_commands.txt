@@ -1,0 +1,26 @@
+# Sample Generator Commands
+# Copy and paste these commands to generate common test scenarios
+
+# Small test file - good for quick testing
+python generate_raffle_data.py 5 5 5 5 --filename small_test.lua
+
+# Large blank file - for testing basic functionality with many accounts
+python generate_raffle_data.py 500 0 0 0 --filename large_blank.lua
+
+# Mail-heavy file - for testing mail processing
+python generate_raffle_data.py 10 0 100 0 --filename mail_heavy.lua
+
+# Roster-heavy file - for testing guild roster functionality  
+python generate_raffle_data.py 10 100 0 0 --filename roster_heavy.lua
+
+# Mixed data file - comprehensive testing
+python generate_raffle_data.py 25 50 75 50 --filename comprehensive.lua
+
+# Performance test file - very large dataset
+python generate_raffle_data.py 100 200 300 400 --filename performance_test.lua
+
+# Edge case testing - single accounts of each type
+python generate_raffle_data.py 1 1 1 1 --filename edge_cases.lua
+
+# Extreme size test - massive file for stress testing
+python generate_raffle_data.py 500 500 500 500 --filename extreme_test.lua

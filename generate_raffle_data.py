@@ -165,7 +165,8 @@ class RaffleDataGenerator:
             "$AccountWide": {
                 "version": 1,
                 "ticket_cost": ticket_cost,
-                "roster_data": self.generate_roster_data(num_roster_entries)
+                "roster_data": self.generate_roster_data(num_roster_entries),
+                "roster_timestamp": random.randint(1600000000, int(time.time()))
             }
         }
     
@@ -197,7 +198,8 @@ class RaffleDataGenerator:
             "ticket_cost": ticket_cost,
             "mail_data": self.generate_mail_data(num_mail_entries, ticket_cost),
             "timestamp": random.randint(1600000000, int(time.time())),
-            "roster_data": self.generate_roster_data(num_roster_entries)
+            "roster_data": self.generate_roster_data(num_roster_entries),
+            "roster_timestamp": random.randint(1600000000, int(time.time()))
         }
         
         # Sometimes add body and subject templates

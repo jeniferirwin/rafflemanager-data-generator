@@ -115,6 +115,7 @@ RaffleManager_SavedVariables =
 2. **Roster Accounts**:
    - Include `roster_data` array with guild member information
    - Each entry contains account, join date, sales/purchase data, rank
+   - Include `roster_timestamp` for roster data last update
    - **Data consistency**: `sales10` ≤ `sales30` and `purchases10` ≤ `purchases30` (10-day totals are subsets of 30-day totals)
 
 3. **Mail Accounts**:
@@ -125,6 +126,7 @@ RaffleManager_SavedVariables =
 
 4. **Mixed Accounts**:
    - Combine both roster and mail data
+   - Include both `timestamp` (mail data) and `roster_timestamp` (roster data)
    - Most comprehensive account type for testing
 
 ## Generated Username Format

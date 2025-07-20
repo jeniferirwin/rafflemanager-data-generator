@@ -13,7 +13,7 @@ import subprocess
 import sys
 import time
 from typing import Dict, Any
-from generate_raffle_data import RaffleDataGenerator, load_config, save_config, DEFAULT_CONFIG
+from generate_raffle_data import RaffleDataGenerator, load_config, save_config, DEFAULT_CONFIG, find_most_recent_generated_file
 
 class HackerTheme:
     """Color scheme and styling for the hacker aesthetic"""
@@ -327,12 +327,27 @@ class RaffleManagerGUI:
         filename_entry = ttk.Entry(section_frame, textvariable=self.filename_var, style='Hacker.TEntry')
         filename_entry.grid(row=1, column=1, sticky="ew", padx=10, pady=5)
         
-        # Browse button
+        # Browse button for filename
         browse_btn = tk.Button(section_frame, text="📁",
                               bg=HackerTheme.BG_LIGHT, fg=HackerTheme.FG_ACCENT,
                               font=('Consolas', 10), relief='ridge', bd=1,
                               command=self.browse_file)
         browse_btn.grid(row=1, column=2, padx=10, pady=5)
+        
+        # Output folder
+        tk.Label(section_frame, text="[FOLDER]", font=('Consolas', 10),
+                fg=HackerTheme.FG_SECONDARY, bg=HackerTheme.BG_MEDIUM).grid(row=2, column=0, sticky="w", padx=10, pady=5)
+        
+        self.output_folder_var = tk.StringVar()
+        folder_entry = ttk.Entry(section_frame, textvariable=self.output_folder_var, style='Hacker.TEntry')
+        folder_entry.grid(row=2, column=1, sticky="ew", padx=10, pady=5)
+        
+        # Browse button for folder
+        browse_folder_btn = tk.Button(section_frame, text="📂",
+                                     bg=HackerTheme.BG_LIGHT, fg=HackerTheme.FG_ACCENT,
+                                     font=('Consolas', 10), relief='ridge', bd=1,
+                                     command=self.browse_folder)
+        browse_folder_btn.grid(row=2, column=2, padx=10, pady=5)
         
     def create_preview_section(self, parent):
         """Create data preview section"""
@@ -460,6 +475,7 @@ class RaffleManagerGUI:
         self.roster_entries_var.set(str(self.config.get('roster_entries_per_account', 10)))
         self.mail_entries_var.set(str(self.config.get('mail_entries_per_account', 10)))
         self.filename_var.set(self.config.get('default_output_filename', 'RaffleManager_Generated.lua'))
+        self.output_folder_var.set(self.config.get('output_folder', ''))
         
         self.update_preview()
         
@@ -496,6 +512,7 @@ class RaffleManagerGUI:
             self.config['mail_entries_per_account'] = 10
         
         self.config['default_output_filename'] = self.filename_var.get() or 'RaffleManager_Generated.lua'
+        self.config['output_folder'] = self.output_folder_var.get() or ''
         
         save_config(self.config)
         
@@ -563,6 +580,14 @@ class RaffleManagerGUI:
         if filename:
             self.filename_var.set(os.path.basename(filename))
             
+    def browse_folder(self):
+        """Open folder dialog for output directory"""
+        folder = filedialog.askdirectory(
+            title="Select Output Folder"
+        )
+        if folder:
+            self.output_folder_var.set(folder)
+            
     def log_message(self, message: str, level: str = "info"):
         """Add a message to the output log"""
         timestamp = time.strftime("%H:%M:%S")
@@ -619,15 +644,31 @@ class RaffleManagerGUI:
             # Run generation in thread to prevent GUI freeze
             def generate_thread():
                 try:
-                    generator = RaffleDataGenerator()
-                    generator.generate_file(
-                        blank_count, roster_count, mail_count, mixed_count,
-                        filename, ticket_cost, roster_entries, mail_entries
-                    )
+                    # Build command
+                    cmd = [
+                        "python", "generate_raffle_data.py",
+                        str(blank_count), str(roster_count), str(mail_count), str(mixed_count),
+                        "--ticket-cost", str(ticket_cost),
+                        "--roster-entries", str(roster_entries),
+                        "--mail-entries", str(mail_entries),
+                        "--filename", filename
+                    ]
                     
-                    total_accounts = blank_count + roster_count + mail_count + mixed_count
-                    self.root.after(0, lambda: self.log_message(
-                        f"Successfully generated {filename} with {total_accounts} accounts", "success"))
+                    # Add output folder if specified
+                    output_folder = self.output_folder_var.get().strip()
+                    if output_folder:
+                        cmd.extend(["--output-folder", output_folder])
+                    
+                    # Run the command
+                    result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8')
+                    
+                    if result.returncode == 0:
+                        total_accounts = blank_count + roster_count + mail_count + mixed_count
+                        self.root.after(0, lambda: self.log_message(
+                            f"Successfully generated {filename} with {total_accounts} accounts", "success"))
+                    else:
+                        self.root.after(0, lambda: self.log_message(
+                            f"Generation failed: {result.stderr}", "error"))
                     
                 except Exception as e:
                     self.root.after(0, lambda: self.log_message(f"Generation failed: {str(e)}", "error"))
@@ -644,8 +685,13 @@ class RaffleManagerGUI:
             
     def validate_last_file(self):
         """Validate the last generated file"""
-        filename = self.filename_var.get() or "RaffleManager_Generated.lua"
+        # Find the most recently generated file
+        filename = find_most_recent_generated_file()
         
+        if not filename:
+            self.log_message("No generated files found to validate", "error")
+            return
+            
         if not os.path.exists(filename):
             self.log_message(f"File {filename} not found", "error")
             return

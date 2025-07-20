@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
-RaffleManager Data Generator
-A CLI tool to generate .lua data files for RaffleManager ESO addon testing.
+RaffleManager Data GeneratoDEFAULT_CONFIG = {
+    "mail_entries_per_account": 15,
+    "roster_entries_per_account": 20,
+    "default_ticket_cost": 1000,
+    "default_output_filename": "RaffleManager_Generated.lua",
+    "output_folder": "",
+    "account_types_enabled": {LI tool to generate .lua data files for RaffleManager ESO addon testing.
 """
 
 import argparse
@@ -367,6 +372,37 @@ def get_unique_filename(base_name: str) -> str:
             return new_name
         counter += 1
 
+def find_most_recent_generated_file() -> str:
+    """Find the most recently generated RaffleManager file"""
+    config = load_config()
+    search_patterns = []
+    
+    # Search in output folder if specified
+    if config.get('output_folder'):
+        search_patterns.append(os.path.join(config['output_folder'], "RaffleManager*.lua"))
+        search_patterns.append(os.path.join(config['output_folder'], "*.lua"))
+    
+    # Also search in current directory
+    search_patterns.append("RaffleManager*.lua")
+    search_patterns.append("*.lua")
+    
+    import glob
+    candidates = []
+    
+    for pattern in search_patterns:
+        matches = glob.glob(pattern)
+        for match in matches:
+            # Skip sample files
+            if not any(sample in match for sample in ['Week', 'Sample', 'Edge', 'High', 'Mega', 'Multi', 'Small', 'Special', 'Comprehensive', 'Extreme']):
+                candidates.append(match)
+    
+    if not candidates:
+        return ""
+    
+    # Return the most recently modified file
+    candidates.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+    return candidates[0]
+
 def main():
     # Load configuration
     config = load_config()
@@ -402,6 +438,8 @@ Examples:
                        help=f'Ticket cost for all accounts (default: {config["default_ticket_cost"]})')
     parser.add_argument('--filename', '-f', type=str,
                        help=f'Output filename (default: {config["default_output_filename"]})')
+    parser.add_argument('--output-folder', '-o', type=str, default=config['output_folder'],
+                       help=f'Output folder path (default: current directory)')
     parser.add_argument('--roster-entries', '-r', type=int, default=config['roster_entries_per_account'],
                        help=f'Number of roster entries per account (default: {config["roster_entries_per_account"]})')
     parser.add_argument('--mail-entries', '-m', type=int, default=config['mail_entries_per_account'],
@@ -447,6 +485,8 @@ Examples:
     config['mail_entries_per_account'] = args.mail_entries
     if args.filename:
         config['default_output_filename'] = args.filename
+    if args.output_folder:
+        config['output_folder'] = args.output_folder
     save_config(config)
     
     # Determine filename
@@ -454,6 +494,12 @@ Examples:
         filename = args.filename
     else:
         filename = config['default_output_filename']
+    
+    # Add output folder if specified
+    if args.output_folder:
+        # Create output folder if it doesn't exist
+        os.makedirs(args.output_folder, exist_ok=True)
+        filename = os.path.join(args.output_folder, filename)
     
     # Ensure unique filename
     filename = get_unique_filename(filename)

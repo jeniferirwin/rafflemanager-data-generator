@@ -47,6 +47,7 @@ python generate_raffle_data.py <blank_count> <roster_count> <mail_count> <mixed_
 - `mail_count`: Number of mail-only accounts  
 - `mixed_count`: Number of mixed accounts (both roster and mail data)
 - `--filename`, `-f`: Optional output filename (default: `RaffleManager_Generated.lua`)
+- `--output-folder`, `-o`: Optional output folder path (default: current directory)
 - `--ticket-cost`, `-t`: Optional ticket cost for all accounts (default: 1000)
 
 ### Examples
@@ -69,6 +70,11 @@ python generate_raffle_data.py 0 0 50 0 --filename mail_only.lua -t 2000
 Generate a comprehensive test file with custom ticket cost:
 ```bash
 python generate_raffle_data.py 25 50 75 100 --filename comprehensive_test.lua --ticket-cost 1500
+```
+
+Generate files in a specific output folder:
+```bash
+python generate_raffle_data.py 10 10 10 10 --output-folder "test_data" --filename weekly_test.lua
 ```
 
 **Windows Users**: Use the convenient batch file:
@@ -182,6 +188,8 @@ python validate.py <filename.lua>
 The validator checks:
 - **Roster Data Consistency**: Ensures `sales10 ≤ sales30` and `purchases10 ≤ purchases30`
 - **Data Integrity**: Verifies proper formatting and structure
+
+**Note**: The GUI validation buttons automatically find and validate the most recently generated file, even if it's in a custom output folder.
 
 ### Example Validation Output
 ```

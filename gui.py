@@ -312,7 +312,6 @@ class RaffleManagerGUI:
         """Create timestamp configuration section"""
         section_frame = tk.Frame(parent, bg=HackerTheme.BG_MEDIUM, relief='ridge', bd=1)
         section_frame.grid(row=2, column=0, sticky="ew", pady=(0, 15))
-        section_frame.grid_columnconfigure(6, weight=1)
         
         # Section header
         header_label = tk.Label(section_frame,

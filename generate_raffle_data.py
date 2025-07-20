@@ -58,7 +58,19 @@ DEFAULT_CONFIG = {
     "mail_entries_per_account": 10,
     "roster_entries_per_account": 10,
     "default_ticket_cost": 1000,
-    "default_output_filename": "RaffleManager_Generated.lua"
+    "default_output_filename": "RaffleManager_Generated.lua",
+    "account_types_enabled": {
+        "blank": True,
+        "roster": True,
+        "mail": True,
+        "mixed": True
+    },
+    "account_counts": {
+        "blank": 5,
+        "roster": 10,
+        "mail": 15,
+        "mixed": 20
+    }
 }
 
 CONFIG_FILE = "config.json"

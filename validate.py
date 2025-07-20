@@ -5,6 +5,12 @@ Validate RaffleManager .lua files for logical consistency
 
 import re
 import sys
+import io
+
+# Fix Windows console encoding issues
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 def validate_roster_data(filename):
     """Validate that roster data has consistent 10-day vs 30-day values"""
@@ -42,7 +48,7 @@ def validate_roster_data(filename):
             print(f"  ... and {len(issues) - 10} more")
         return False
     else:
-        print("✓ All entries are logically consistent!")
+        print("[SUCCESS] All entries are logically consistent!")
         return True
 
 if __name__ == "__main__":

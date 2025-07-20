@@ -5,6 +5,12 @@ Check mail amounts for divisibility by ticket cost
 
 import re
 import sys
+import io
+
+# Fix Windows console encoding issues
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 def check_amounts(filename):
     """Check what percentage of mail amounts are divisible by ticket cost"""

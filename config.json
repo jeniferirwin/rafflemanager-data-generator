@@ -2,5 +2,17 @@
   "mail_entries_per_account": 25,
   "roster_entries_per_account": 20,
   "default_ticket_cost": 750,
-  "default_output_filename": "RaffleManager_Generated.lua"
+  "default_output_filename": "RaffleManager-Generated.lua",
+  "account_types_enabled": {
+    "blank": true,
+    "roster": true,
+    "mail": true,
+    "mixed": true
+  },
+  "account_counts": {
+    "blank": 5,
+    "roster": 10,
+    "mail": 15,
+    "mixed": 20
+  }
 }

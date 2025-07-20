@@ -13,7 +13,7 @@ import subprocess
 import sys
 import time
 from typing import Dict, Any
-from generate_raffle_data import RaffleDataGenerator, load_config, save_config, DEFAULT_CONFIG, find_most_recent_generated_file
+from generate_raffle_data import RaffleDataGenerator, load_config, save_config, DEFAULT_CONFIG, find_most_recent_generated_file, timestamp_config_to_unix
 
 class HackerTheme:
     """Color scheme and styling for the hacker aesthetic"""
@@ -132,6 +132,9 @@ class RaffleManagerGUI:
         
         # Settings Section
         self.create_settings_section(main_frame)
+        
+        # Timestamp Section
+        self.create_timestamp_section(main_frame)
         
         # Output Section
         self.create_output_section(main_frame)
@@ -305,10 +308,66 @@ class RaffleManagerGUI:
         mail_entries_entry.grid(row=2, column=1, sticky="w", padx=10, pady=5)
         mail_entries_entry.bind('<KeyRelease>', lambda e: self.update_preview())
         
+    def create_timestamp_section(self, parent):
+        """Create timestamp configuration section"""
+        section_frame = tk.Frame(parent, bg=HackerTheme.BG_MEDIUM, relief='ridge', bd=1)
+        section_frame.grid(row=2, column=0, sticky="ew", pady=(0, 15))
+        section_frame.grid_columnconfigure(6, weight=1)
+        
+        # Section header
+        header_label = tk.Label(section_frame,
+                               text=">>> TIMESTAMP CONFIG <<<",
+                               font=('Consolas', 12, 'bold'),
+                               fg=HackerTheme.FG_PRIMARY,
+                               bg=HackerTheme.BG_MEDIUM)
+        header_label.grid(row=0, column=0, columnspan=7, pady=10)
+        
+        # Month/Day/Year
+        tk.Label(section_frame, text="MM", font=('Consolas', 9),
+                fg=HackerTheme.FG_SECONDARY, bg=HackerTheme.BG_MEDIUM).grid(row=1, column=0, padx=5, pady=5)
+        self.month_var = tk.StringVar()
+        month_entry = ttk.Entry(section_frame, textvariable=self.month_var, width=3, style='Hacker.TEntry')
+        month_entry.grid(row=2, column=0, padx=5, pady=5)
+        
+        tk.Label(section_frame, text="DD", font=('Consolas', 9),
+                fg=HackerTheme.FG_SECONDARY, bg=HackerTheme.BG_MEDIUM).grid(row=1, column=1, padx=5, pady=5)
+        self.day_var = tk.StringVar()
+        day_entry = ttk.Entry(section_frame, textvariable=self.day_var, width=3, style='Hacker.TEntry')
+        day_entry.grid(row=2, column=1, padx=5, pady=5)
+        
+        tk.Label(section_frame, text="YYYY", font=('Consolas', 9),
+                fg=HackerTheme.FG_SECONDARY, bg=HackerTheme.BG_MEDIUM).grid(row=1, column=2, padx=5, pady=5)
+        self.year_var = tk.StringVar()
+        year_entry = ttk.Entry(section_frame, textvariable=self.year_var, width=5, style='Hacker.TEntry')
+        year_entry.grid(row=2, column=2, padx=5, pady=5)
+        
+        # Time separator
+        tk.Label(section_frame, text="│", font=('Consolas', 14),
+                fg=HackerTheme.FG_ACCENT, bg=HackerTheme.BG_MEDIUM).grid(row=1, column=3, rowspan=2, padx=10)
+        
+        # Hour/Minute/Second
+        tk.Label(section_frame, text="HH", font=('Consolas', 9),
+                fg=HackerTheme.FG_SECONDARY, bg=HackerTheme.BG_MEDIUM).grid(row=1, column=4, padx=5, pady=5)
+        self.hour_var = tk.StringVar()
+        hour_entry = ttk.Entry(section_frame, textvariable=self.hour_var, width=3, style='Hacker.TEntry')
+        hour_entry.grid(row=2, column=4, padx=5, pady=5)
+        
+        tk.Label(section_frame, text="MM", font=('Consolas', 9),
+                fg=HackerTheme.FG_SECONDARY, bg=HackerTheme.BG_MEDIUM).grid(row=1, column=5, padx=5, pady=5)
+        self.minute_var = tk.StringVar()
+        minute_entry = ttk.Entry(section_frame, textvariable=self.minute_var, width=3, style='Hacker.TEntry')
+        minute_entry.grid(row=2, column=5, padx=5, pady=5)
+        
+        tk.Label(section_frame, text="SS", font=('Consolas', 9),
+                fg=HackerTheme.FG_SECONDARY, bg=HackerTheme.BG_MEDIUM).grid(row=1, column=6, padx=5, pady=5)
+        self.second_var = tk.StringVar()
+        second_entry = ttk.Entry(section_frame, textvariable=self.second_var, width=3, style='Hacker.TEntry')
+        second_entry.grid(row=2, column=6, padx=5, pady=5)
+        
     def create_output_section(self, parent):
         """Create output file configuration section"""
         section_frame = tk.Frame(parent, bg=HackerTheme.BG_MEDIUM, relief='ridge', bd=1)
-        section_frame.grid(row=3, column=0, sticky="ew", pady=(0, 15))
+        section_frame.grid(row=4, column=0, sticky="ew", pady=(0, 15))
         section_frame.grid_columnconfigure(1, weight=1)
         
         # Section header
@@ -352,7 +411,7 @@ class RaffleManagerGUI:
     def create_preview_section(self, parent):
         """Create data preview section"""
         section_frame = tk.Frame(parent, bg=HackerTheme.BG_MEDIUM, relief='ridge', bd=1)
-        section_frame.grid(row=4, column=0, sticky="ew", pady=(0, 15))
+        section_frame.grid(row=5, column=0, sticky="ew", pady=(0, 15))
         section_frame.grid_columnconfigure(0, weight=1)
         
         # Section header
@@ -377,7 +436,7 @@ class RaffleManagerGUI:
     def create_action_buttons(self, parent):
         """Create action buttons"""
         button_frame = tk.Frame(parent, bg=HackerTheme.BG_DARK)
-        button_frame.grid(row=5, column=0, pady=(0, 15))
+        button_frame.grid(row=6, column=0, pady=(0, 15))
         
         # Generate button
         self.generate_btn = tk.Button(button_frame, text="⚡ GENERATE DATA ⚡",
@@ -406,7 +465,7 @@ class RaffleManagerGUI:
     def create_output_area(self, parent):
         """Create output/log area with fixed height"""
         section_frame = tk.Frame(parent, bg=HackerTheme.BG_MEDIUM, relief='ridge', bd=1)
-        section_frame.grid(row=6, column=0, sticky="ew", pady=(15, 0))
+        section_frame.grid(row=7, column=0, sticky="ew", pady=(15, 0))
         section_frame.grid_rowconfigure(1, weight=0)  # Don't expand
         section_frame.grid_columnconfigure(0, weight=1)
         
@@ -477,6 +536,17 @@ class RaffleManagerGUI:
         self.filename_var.set(self.config.get('default_output_filename', 'RaffleManager_Generated.lua'))
         self.output_folder_var.set(self.config.get('output_folder', ''))
         
+        # Timestamp settings
+        timestamp_config = self.config.get('timestamp_config', {
+            'month': 7, 'day': 20, 'year': 2025, 'hour': 0, 'minute': 0, 'second': 0
+        })
+        self.month_var.set(str(timestamp_config.get('month', 7)).zfill(2))
+        self.day_var.set(str(timestamp_config.get('day', 20)).zfill(2))
+        self.year_var.set(str(timestamp_config.get('year', 2025)))
+        self.hour_var.set(str(timestamp_config.get('hour', 0)).zfill(2))
+        self.minute_var.set(str(timestamp_config.get('minute', 0)).zfill(2))
+        self.second_var.set(str(timestamp_config.get('second', 0)).zfill(2))
+        
         self.update_preview()
         
     def save_settings(self):
@@ -513,6 +583,22 @@ class RaffleManagerGUI:
         
         self.config['default_output_filename'] = self.filename_var.get() or 'RaffleManager_Generated.lua'
         self.config['output_folder'] = self.output_folder_var.get() or ''
+        
+        # Save timestamp configuration
+        timestamp_config = {}
+        try:
+            timestamp_config['month'] = int(self.month_var.get() or "7")
+            timestamp_config['day'] = int(self.day_var.get() or "20")
+            timestamp_config['year'] = int(self.year_var.get() or "2025")
+            timestamp_config['hour'] = int(self.hour_var.get() or "0")
+            timestamp_config['minute'] = int(self.minute_var.get() or "0")
+            timestamp_config['second'] = int(self.second_var.get() or "0")
+        except ValueError:
+            # Use defaults if invalid values
+            timestamp_config = {
+                'month': 7, 'day': 20, 'year': 2025, 'hour': 0, 'minute': 0, 'second': 0
+            }
+        self.config['timestamp_config'] = timestamp_config
         
         save_config(self.config)
         

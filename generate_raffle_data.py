@@ -6,6 +6,14 @@ RaffleManager Data GeneratoDEFAULT_CONFIG = {
     "default_ticket_cost": 1000,
     "default_output_filename": "RaffleManager_Generated.lua",
     "output_folder": "",
+    "timestamp_config": {
+        "month": 7,
+        "day": 20,
+        "year": 2025,
+        "hour": 0,
+        "minute": 0,
+        "second": 0
+    },
     "account_types_enabled": {LI tool to generate .lua data files for RaffleManager ESO addon testing.
 """
 
@@ -14,7 +22,8 @@ import random
 import time
 import os
 import json
-from typing import List, Dict, Any
+import datetime
+from typing import List, Dict, Any, Optional
 
 # Word lists for generating realistic but generic usernames (similar to Docker container names)
 ADJECTIVES = [
@@ -113,10 +122,28 @@ def reset_config_to_defaults() -> Dict[str, Any]:
     save_config(config)
     return config
 
+def timestamp_config_to_unix(timestamp_config: Dict[str, int]) -> int:
+    """Convert timestamp configuration to Unix timestamp"""
+    try:
+        dt = datetime.datetime(
+            year=timestamp_config.get('year', 2025),
+            month=timestamp_config.get('month', 7), 
+            day=timestamp_config.get('day', 20),
+            hour=timestamp_config.get('hour', 0),
+            minute=timestamp_config.get('minute', 0),
+            second=timestamp_config.get('second', 0)
+        )
+        return int(dt.timestamp())
+    except (ValueError, TypeError):
+        # Fallback to July 20, 2025 midnight if invalid config
+        dt = datetime.datetime(2025, 7, 20, 0, 0, 0)
+        return int(dt.timestamp())
+
 class RaffleDataGenerator:
-    def __init__(self):
+    def __init__(self, base_timestamp: Optional[int] = None):
         self.used_usernames = set()
         self.used_mail_ids = set()
+        self.base_timestamp = base_timestamp if base_timestamp is not None else int(time.time())
         
     def generate_username(self) -> str:
         """Generate a unique username using adjective + noun pattern"""
@@ -142,6 +169,12 @@ class RaffleDataGenerator:
         username = f"@{random.choice(ADJECTIVES).title()}{timestamp}"
         self.used_usernames.add(username)
         return username
+    
+    def generate_timestamp_near_base(self, max_offset_days: int = 30) -> int:
+        """Generate a timestamp near the base timestamp (within max_offset_days)"""
+        max_offset_seconds = max_offset_days * 24 * 60 * 60
+        offset = random.randint(-max_offset_seconds, max_offset_seconds)
+        return max(0, self.base_timestamp + offset)
     
     def generate_mail_id(self) -> str:
         """Generate a unique mail ID"""
@@ -182,7 +215,7 @@ class RaffleDataGenerator:
             
             entry = {
                 "account": self.generate_username(),
-                "joined": random.randint(0, int(time.time())),
+                "joined": self.generate_timestamp_near_base(365),  # Within a year of base
                 "sales10": sales10,
                 "purchases30": purchases30,
                 "sales30": sales30,
@@ -226,7 +259,7 @@ class RaffleDataGenerator:
                 "version": 1,
                 "ticket_cost": ticket_cost,
                 "roster_data": self.generate_roster_data(roster_entries),
-                "roster_timestamp": random.randint(1600000000, int(time.time()))
+                "roster_timestamp": self.generate_timestamp_near_base(7)  # Within a week
             }
         }
     
@@ -237,7 +270,7 @@ class RaffleDataGenerator:
             "version": 1,
             "ticket_cost": ticket_cost,
             "mail_data": self.generate_mail_data(mail_entries, ticket_cost),
-            "timestamp": random.randint(1600000000, int(time.time()))
+            "timestamp": self.generate_timestamp_near_base(7)  # Within a week
         }
         
         # Sometimes add body and subject templates
@@ -254,9 +287,9 @@ class RaffleDataGenerator:
             "version": 1,
             "ticket_cost": ticket_cost,
             "mail_data": self.generate_mail_data(mail_entries, ticket_cost),
-            "timestamp": random.randint(1600000000, int(time.time())),
+            "timestamp": self.generate_timestamp_near_base(7),  # Within a week
             "roster_data": self.generate_roster_data(roster_entries),
-            "roster_timestamp": random.randint(1600000000, int(time.time()))
+            "roster_timestamp": self.generate_timestamp_near_base(7)  # Within a week
         }
         
         # Sometimes add body and subject templates
@@ -444,6 +477,10 @@ Examples:
                        help=f'Number of roster entries per account (default: {config["roster_entries_per_account"]})')
     parser.add_argument('--mail-entries', '-m', type=int, default=config['mail_entries_per_account'],
                        help=f'Number of mail entries per account (default: {config["mail_entries_per_account"]})')
+    parser.add_argument('--timestamp-date', type=str,
+                       help='Base timestamp date in MM/DD/YYYY format (default: 07/20/2025)')
+    parser.add_argument('--timestamp-time', type=str,
+                       help='Base timestamp time in HH:MM:SS format (default: 00:00:00)')
     parser.add_argument('--reset-config', action='store_true',
                        help='Reset all settings to program defaults and exit')
     
@@ -479,6 +516,38 @@ Examples:
         print("Error: At least one account must be specified")
         return 1
     
+    # Handle timestamp arguments
+    if args.timestamp_date or args.timestamp_time:
+        timestamp_config = config.get('timestamp_config', {
+            'month': 7, 'day': 20, 'year': 2025, 'hour': 0, 'minute': 0, 'second': 0
+        })
+        
+        if args.timestamp_date:
+            try:
+                parts = args.timestamp_date.split('/')
+                if len(parts) != 3:
+                    raise ValueError("Date must be in MM/DD/YYYY format")
+                timestamp_config['month'] = int(parts[0])
+                timestamp_config['day'] = int(parts[1])
+                timestamp_config['year'] = int(parts[2])
+            except (ValueError, IndexError) as e:
+                print(f"Error: Invalid date format. Use MM/DD/YYYY: {e}")
+                return 1
+                
+        if args.timestamp_time:
+            try:
+                parts = args.timestamp_time.split(':')
+                if len(parts) != 3:
+                    raise ValueError("Time must be in HH:MM:SS format")
+                timestamp_config['hour'] = int(parts[0])
+                timestamp_config['minute'] = int(parts[1])
+                timestamp_config['second'] = int(parts[2])
+            except (ValueError, IndexError) as e:
+                print(f"Error: Invalid time format. Use HH:MM:SS: {e}")
+                return 1
+        
+        config['timestamp_config'] = timestamp_config
+    
     # Update and save configuration with new values
     config['default_ticket_cost'] = args.ticket_cost
     config['roster_entries_per_account'] = args.roster_entries
@@ -505,7 +574,8 @@ Examples:
     filename = get_unique_filename(filename)
     
     # Generate the file
-    generator = RaffleDataGenerator()
+    base_timestamp = timestamp_config_to_unix(config.get('timestamp_config', {}))
+    generator = RaffleDataGenerator(base_timestamp)
     generator.generate_file(args.blank_count, args.roster_count, 
                            args.mail_count, args.mixed_count, filename, 
                            args.ticket_cost, args.roster_entries, args.mail_entries)

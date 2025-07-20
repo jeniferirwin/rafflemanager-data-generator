@@ -2,8 +2,16 @@
   "mail_entries_per_account": 25,
   "roster_entries_per_account": 20,
   "default_ticket_cost": 750,
-  "default_output_filename": "TestFile.lua",
+  "default_output_filename": "default_timestamp_test.lua",
   "output_folder": "test_output",
+  "timestamp_config": {
+    "month": 7,
+    "day": 20,
+    "year": 2025,
+    "hour": 0,
+    "minute": 0,
+    "second": 0
+  },
   "account_types_enabled": {
     "blank": true,
     "roster": true,

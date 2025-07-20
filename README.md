@@ -49,6 +49,8 @@ python generate_raffle_data.py <blank_count> <roster_count> <mail_count> <mixed_
 - `--filename`, `-f`: Optional output filename (default: `RaffleManager_Generated.lua`)
 - `--output-folder`, `-o`: Optional output folder path (default: current directory)
 - `--ticket-cost`, `-t`: Optional ticket cost for all accounts (default: 1000)
+- `--timestamp-date`: Base timestamp date in MM/DD/YYYY format (default: 07/20/2025)
+- `--timestamp-time`: Base timestamp time in HH:MM:SS format (default: 00:00:00)
 
 ### Examples
 
@@ -77,6 +79,11 @@ Generate files in a specific output folder:
 python generate_raffle_data.py 10 10 10 10 --output-folder "test_data" --filename weekly_test.lua
 ```
 
+Generate with custom timestamp (Christmas 2024 data):
+```bash
+python generate_raffle_data.py 5 5 5 5 --timestamp-date "12/25/2024" --timestamp-time "09:00:00"
+```
+
 **Windows Users**: Use the convenient batch file:
 ```cmd
 generate.bat 5 10 15 20
@@ -85,6 +92,29 @@ generate.bat 10 20 30 40 custom.lua 1500
 ```
 
 **More Examples**: See `sample_commands.txt` for additional usage scenarios.
+
+## Timestamp Configuration
+
+The tool allows you to control the base timestamp for all generated data:
+
+- **Base Timestamp**: Set via CLI arguments or GUI fields (MM/DD/YYYY HH:MM:SS)
+- **Realistic Variation**: Generated timestamps vary within ±30 days of the base timestamp
+- **Data Consistency**: Mail and roster timestamps are within ±7 days of the base timestamp
+- **Default Setting**: July 20, 2025 at 00:00:00
+
+### CLI Timestamp Examples
+```bash
+# Generate data for a specific historical date
+python generate_raffle_data.py 10 10 10 10 --timestamp-date "03/15/2023" --timestamp-time "14:30:00"
+
+# Generate current date data (default behavior if no timestamp specified)
+python generate_raffle_data.py 5 5 5 5
+```
+
+### GUI Timestamp Fields
+The GUI provides six input boxes for easy timestamp configuration:
+- **MM DD YYYY**: Month, Day, Year (e.g., 07 20 2025)
+- **HH MM SS**: Hour, Minute, Second in 24-hour format (e.g., 00 00 00)
 
 ## Generated Data Structure
 
